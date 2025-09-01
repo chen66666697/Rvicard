@@ -1,0 +1,261 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2022 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+
+#include "rv1106.dtsi"
+#include "rv1106-evb.dtsi"
+#include "rv1106-luckfox-pico-pro-max-ipc.dtsi"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/display/media-bus-format.h>
+
+
+/ {
+	model = "Luckfox Pico Max";
+	compatible = "rockchip,rv1103g-38x38-ipc-v10", "rockchip,rv1106";
+
+
+
+	leds {
+        compatible = "gpio-leds";
+        
+        heartbeat_led {
+            label = "heartbeat";
+            gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
+            default-state = "on";
+            //max-brightness = <255>;  // 手动设置最大亮度
+            linux,default-trigger = "heartbeat";
+            status = "okay";  // 这应该在每个 LED 节点下
+        };
+    };
+    
+    sdio_pwrseq: sdio-pwrseq {
+	compatible = "mmc-pwrseq-simple";
+	pinctrl-names = "default";
+	pinctrl-0 = <&wifi_enable_h>;
+	reset-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;//随便给的
+	};
+
+
+    wireless_wlan: wireless-wlan {
+		compatible = "wlan-platdata";
+		wifi_chip_type = "rtl8723ds";
+		pinctrl-names = "default";
+		WIFI,host_wake_irq = <&gpio3 RK_PC6 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+	
+	reserved_memory: reserved-memory {
+		status = "okay";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+		linux,cma {
+			status = "okay";
+			compatible = "shared-dma-pool";
+			inactive;
+			reusable;
+			size = <0xA00000>; //10M
+			linux,cma-default;
+		};
+	};
+
+	/* LCD 面板描述 */
+	panel: panel {
+		compatible = "simple-panel";
+		status = "okay";
+		
+
+		bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
+		width-mm = <95>;
+		height-mm = <54>;
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0: timing0 {
+				clock-frequency = <9000000>;
+				hactive = <480>;
+				vactive = <272>;
+				hsync-len = <43>;
+				hback-porch = <2>;
+				hfront-porch = <2>;
+				vsync-len = <12>;
+				vback-porch = <2>;
+				vfront-porch = <2>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		port {
+			panel_in_rgb: endpoint {
+				remote-endpoint = <&rgb_out_panel>;
+			};
+		};
+	};
+
+
+};
+
+&rgb {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_pins>;
+
+	ports {
+		rgb_out: port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			rgb_out_panel: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&panel_in_rgb>;
+			};
+		};
+	};
+};
+
+
+&display_subsystem {
+        status = "okay";
+        
+};
+
+
+&rgb_in_vop {
+	status = "okay";
+};
+
+&route_rgb {
+    status = "okay";
+};
+
+&vop {
+        status = "okay";
+};
+
+/**********FLASH**********/
+&sfc {
+	status = "okay";
+	flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-max-frequency = <75000000>;
+		spi-rx-bus-width = <4>;
+		spi-tx-bus-width = <1>;
+	};
+	
+};
+
+/**********SDMMC**********/
+&sdmmc {
+    max-frequency = <50000000>;
+    bus-width = <4>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    cap-sd-highspeed;
+    cap-sdio-irq;
+    keep-power-in-suspend;
+    non-removable;
+    supports-sdio;
+    mmc-pwrseq = <&sdio_pwrseq>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_bus4 &sdmmc0_det>;
+    status = "okay";
+    
+     wifi@1 {
+        reg = <1>;  // function 1 是标准 SDIO WLAN 的 function
+        compatible = "realtek,rtl8723ds";
+        interrupt-parent = <&gpio3>;
+        interrupts = <RK_PC6 IRQ_TYPE_LEVEL_HIGH>; // 与 wireless_wlan 中的保持一致
+        rockchip,wl-host-wake-gpios = <&gpio3 RK_PC6 GPIO_ACTIVE_HIGH>; // 可选，用于唤醒
+        status = "okay";
+    };
+    
+};
+
+
+/**********ETH**********/
+&gmac {
+	status = "disabled";
+};
+
+/**********USB**********/
+&usbdrd_dwc3 {
+	status = "okay";
+	dr_mode = "peripheral";
+};
+
+
+
+&pinctrl {
+	sdmmc0{
+		sdmmc0_det: sdmmc0-det {
+			rockchip,pins =
+				/* sdmmc0_det */
+				<3 RK_PA1 1 &pcfg_pull_down>;
+		};
+  	};
+	
+	wireless-wlan {
+		wifi_host_wake_irq: wifi-host-wake-irq {
+			rockchip,pins = <3 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	wifi-enable{
+		wifi_enable_h:wifi-enable-h{
+		rockchip,pins = <1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+			 
+};
+
+
+/**********I2C**********/
+/* I2C3_M1 */
+&i2c3 {
+	status = "disabled";
+	clock-frequency = <100000>;
+};
+
+/* I2C1_M0 */
+&i2c1 {
+	status = "okay";
+	clock-frequency = <400000>;
+	pincrtl-0=<&i2c1m0_xfer>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+    	#size-cells = <0>;
+	
+	mpu6050:mpu6050@68{
+		compatible= "test,mpu6050";
+		reg=<0x68>;
+		status="okay";
+	
+	};
+
+};
+
+
+/**********UART**********/
+/* UART3_M1 */
+&uart3 {
+	status = "disabled";
+};
+
+/* UART4_M1 */
+&uart4 {
+	status = "disabled";
+};
+
+/**********RTC**********/
+&rtc {
+	status = "okay";
+};

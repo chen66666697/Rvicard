@@ -1,0 +1,22 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    echo "Starting FFmpeg video playback..."
+    ffmpeg -re -i /root/output_dong_480_272.mp4 -vf "scale=480:272,fps=60" -pix_fmt bgra -f fbdev /dev/fb0 -f wav - | aplay -D hw:0,0 &
+    ;;
+  stop)
+    echo "Stopping FFmpeg video playback..."
+    pkill -f "ffmpeg -re -i /root/output_dong_480_272.mp4"
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0
