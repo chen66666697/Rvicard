@@ -1,0 +1,22 @@
+#env.img 0x0:0x0 0x200:0x40000 0x200:0x40000
+mw.b ${ramdisk_addr_r} 0xff 0x40000; fatload mmc 1 ${ramdisk_addr_r} env.img; mtd erase spi-nand0 0x0 0x40000; mtd write spi-nand0 ${ramdisk_addr_r} 0x0 0x40000;
+
+#idblock.img 0x200:0x40000 0x200:0x40000 0x164:0x2C800
+mw.b ${ramdisk_addr_r} 0xff 0x2C800; fatload mmc 1 ${ramdisk_addr_r} idblock.img; mtd erase spi-nand0 0x40000 0x40000; mtd write spi-nand0 ${ramdisk_addr_r} 0x40000 0x2C800;
+
+#uboot.img 0x400:0x80000 0x400:0x80000 0x200:0x40000
+mw.b ${ramdisk_addr_r} 0xff 0x40000; fatload mmc 1 ${ramdisk_addr_r} uboot.img; mtd erase spi-nand0 0x80000 0x80000; mtd write spi-nand0 ${ramdisk_addr_r} 0x80000 0x40000;
+
+#boot.img 0x800:0x100000 0x2000:0x400000 0x17F7:0x2FEE00
+mw.b ${ramdisk_addr_r} 0xff 0x2FEE00; fatload mmc 1 ${ramdisk_addr_r} boot.img; mtd erase spi-nand0 0x100000 0x400000; mtd write spi-nand0 ${ramdisk_addr_r} 0x100000 0x2FEE00;
+
+#oem.img 0x2800:0x500000 0xF000:0x1E00000 0xA400:0x1480000
+mw.b ${ramdisk_addr_r} 0xff 0x1480000; fatload mmc 1 ${ramdisk_addr_r} oem.img; mtd erase spi-nand0 0x500000 0x1E00000; mtd write spi-nand0 ${ramdisk_addr_r} 0x500000 0x1480000;
+
+#userdata.img 0x11800:0x2300000 0x5000:0xA00000 0xF00:0x1E0000
+mw.b ${ramdisk_addr_r} 0xff 0x1E0000; fatload mmc 1 ${ramdisk_addr_r} userdata.img; mtd erase spi-nand0 0x2300000 0xA00000; mtd write spi-nand0 ${ramdisk_addr_r} 0x2300000 0x1E0000;
+
+#rootfs.img 0x16800:0x2D00000 0x69000:0xD200000 0x2CF00:0x59E0000
+mw.b ${ramdisk_addr_r} 0xff 0x59E0000; fatload mmc 1 ${ramdisk_addr_r} rootfs.img; mtd erase spi-nand0 0x2D00000 0xD200000; mtd write spi-nand0 ${ramdisk_addr_r} 0x2D00000 0x59E0000;
+
+% <- this is end of file symbol
