@@ -19,6 +19,16 @@ Rvicard 是我出于个人兴趣设计的一款嵌入式开发板，目标是做
 
 
 
+
+
+### 图片展示
+
+<img src="pictures\00dccad3024e4df801cbe445f727bf69.jpg" alt="00dccad3024e4df801cbe445f727bf69" style="zoom: 33%;" />
+
+<img src="pictures\image-20250904004626774.png" alt="image-20250904004626774" style="zoom: 80%;" />
+
+
+
 # 目录结构
 
 ------
